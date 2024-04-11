@@ -4,21 +4,28 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    // Start is called before the first frame update
+    // Internals
     [HideInInspector] public StateMachine stateMachine;
     [HideInInspector] public Idle idleState;
     [HideInInspector] public Walking walkingState;
     [HideInInspector] public Jump jumpState;
     [HideInInspector] public Dead deadState;
     [HideInInspector] public Collider thisCollider;
-    [HideInInspector] public Vector3 movementVector;
     [HideInInspector] public Rigidbody thisRigidbody;
     [HideInInspector] public Animator thisAnimator;
-    [HideInInspector] public bool hasJumpInput;
-    [HideInInspector] public bool isGrounded;
+    [Header("Movement")]
     public float speed = 10f;
+    public float maxSpeed = 10f;
+    [HideInInspector] public Vector3 movementVector;
+    [Header("Jump")]
     public float jumpPower = 8f;
     public float jumpMovementFactor = 0.5f;
+    [HideInInspector] public bool hasJumpInput;
+    [Header("Slope")]
+    public float maxSlopeAngle = 45;
+    [HideInInspector] public bool isGrounded;
+    [HideInInspector] public bool isOnSlope;
+    [HideInInspector] public Vector3 slopeNormal;
 
     void Awake() {
         thisRigidbody = GetComponent<Rigidbody>();
@@ -52,7 +59,7 @@ public class PlayerController : MonoBehaviour
         movementVector = new Vector3(inputX, 0, inputZ);
         hasJumpInput = Input.GetKey(KeyCode.Space);
 
-        float velocity = thisRigidbody.velocity.magnitude/speed;
+        float velocity = thisRigidbody.velocity.magnitude/maxSpeed;
         thisAnimator.SetFloat("fVelocity",velocity);
 
         DetectGround();
@@ -60,6 +67,10 @@ public class PlayerController : MonoBehaviour
         stateMachine.Update();
     }
     void FixedUpdate() {
+        Vector3 gravityForce = Physics.gravity * (isOnSlope ? 0.25f : 1f);
+        thisRigidbody.AddForce(gravityForce, ForceMode.Acceleration);
+
+        LimitSpeed();
         stateMachine.FixedUpdate();
     }
     void LateUpdate() {
@@ -96,37 +107,20 @@ public class PlayerController : MonoBehaviour
         // detect ground
         Vector3 origin = transform.position;
         Vector3 direction = Vector3.down;
-        Bounds bounds = thisCollider.bounds;
-        float radius = bounds.size.y * 0.33f;
-        float maxDistance = bounds.size.y * 0.25f;
-        if(Physics.SphereCast(origin, radius, direction, out var hitInfo, maxDistance)) {
-            GameObject hitObject = hitInfo.transform.gameObject;
-            if(hitObject.CompareTag("Plataform") | hitObject.CompareTag("Water")){
-                isGrounded = true;
-            }
+        float maxDistance = 0.1f;
+        LayerMask groundLayer = GameManager.Instance.groundLayer;
+        if(Physics.Raycast(origin, direction, out var hitInfo, maxDistance, groundLayer)) {
+            isGrounded = true;
         }
     }
 
-    void OnDrawGizmos() {
-        if(!thisCollider) return;
+    private void LimitSpeed() {
+        Vector3 flatVelocity = new Vector3(thisRigidbody.velocity.x, 0, thisRigidbody.velocity.z);
+        if (flatVelocity.magnitude > maxSpeed) {
+            Vector3 limitedVelocity = flatVelocity.normalized * maxSpeed;
+            thisRigidbody.velocity = new Vector3(limitedVelocity.x, thisRigidbody.velocity.y, limitedVelocity.z);
+        }
 
-        Vector3 origin = transform.position;
-        Vector3 direction = Vector3.down;
-        Bounds bounds = thisCollider.bounds;
-        float radius = bounds.size.x * 0.33f;
-        float maxDistance = bounds.size.y * 0.25f;
-
-        // Draw ray
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawRay(new Ray(origin, direction * maxDistance));
-
-        // Draw origin
-        Gizmos.color = Color.gray;
-        Gizmos.DrawSphere(origin, 0.1f);
-
-        //Draw sphere
-        Vector3 spherePosition = direction * maxDistance + origin;
-        Gizmos.color = isGrounded ? Color.green : Color.red;
-        Gizmos.DrawSphere(spherePosition, radius);
     }
+
 }
