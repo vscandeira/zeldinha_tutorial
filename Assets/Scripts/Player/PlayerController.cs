@@ -59,15 +59,16 @@ public class PlayerController : MonoBehaviour
         movementVector = new Vector3(inputX, 0, inputZ);
         hasJumpInput = Input.GetKey(KeyCode.Space);
 
-        float velocity = thisRigidbody.velocity.magnitude/maxSpeed;
+        float velocity = thisRigidbody.velocity.magnitude;
         thisAnimator.SetFloat("fVelocity",velocity);
 
         DetectGround();
+        DetectSlope();
 
         stateMachine.Update();
     }
     void FixedUpdate() {
-        Vector3 gravityForce = Physics.gravity * (isOnSlope ? 0.25f : 1f);
+        Vector3 gravityForce = Physics.gravity * (isOnSlope ? -0.8f : 1f);
         thisRigidbody.AddForce(gravityForce, ForceMode.Acceleration);
 
         LimitSpeed();
@@ -109,8 +110,22 @@ public class PlayerController : MonoBehaviour
         Vector3 direction = Vector3.down;
         float maxDistance = 0.1f;
         LayerMask groundLayer = GameManager.Instance.groundLayer;
-        if(Physics.Raycast(origin, direction, out var hitInfo, maxDistance, groundLayer)) {
+        if(Physics.Raycast(origin, direction, maxDistance, groundLayer)) {
             isGrounded = true;
+        }
+    }
+
+    public void DetectSlope(){
+        isOnSlope = false;
+        slopeNormal = Vector3.zero;
+
+        Vector3 origin = transform.position;
+        Vector3 direction = Vector3.down;
+        float maxDistance = 0.2f;
+        if (Physics.Raycast(origin, direction, out var slopeHitInfo, maxDistance)){
+            float angle = Vector3.Angle(Vector3.up, slopeHitInfo.normal);
+            isOnSlope = angle < maxSlopeAngle && angle != 0;
+            slopeNormal = isOnSlope ? slopeHitInfo.normal : Vector3.zero;
         }
     }
 
@@ -121,6 +136,11 @@ public class PlayerController : MonoBehaviour
             thisRigidbody.velocity = new Vector3(limitedVelocity.x, thisRigidbody.velocity.y, limitedVelocity.z);
         }
 
+    }
+
+    void OnGUI() {
+        string s= stateMachine.currentStateName + " - " + isOnSlope;
+        GUI.Label(new Rect(5,5,400,100), s);
     }
 
 }

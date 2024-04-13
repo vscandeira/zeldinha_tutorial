@@ -27,6 +27,9 @@ public class Walking : State {
     public override void FixedUpdate() {
         base.FixedUpdate();
         Vector3 walkVector = controller.CreateWalk(controller.movementVector);
+        walkVector = Vector3.ProjectOnPlane(walkVector, controller.slopeNormal);
+        walkVector *= controller.speed;
+        
         controller.thisRigidbody.AddForce(walkVector, ForceMode.Force);
         controller.RotateBodyToFaceInput();
     }
