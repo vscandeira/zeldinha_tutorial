@@ -1197,7 +1197,12 @@ PrefabInstance:
     - target: {fileID: 3001390704365698872, guid: a207854b134c34a41b6b48ef8d2b8bf5,
         type: 3}
       propertyPath: m_Drag
-      value: 0.6
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3001390704365698872, guid: a207854b134c34a41b6b48ef8d2b8bf5,
+        type: 3}
+      propertyPath: m_UseGravity
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3001390704365698873, guid: a207854b134c34a41b6b48ef8d2b8bf5,
         type: 3}
@@ -1218,12 +1223,12 @@ PrefabInstance:
     - target: {fileID: 3001390704365698874, guid: a207854b134c34a41b6b48ef8d2b8bf5,
         type: 3}
       propertyPath: jumpPower
-      value: 25
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 3001390704365698874, guid: a207854b134c34a41b6b48ef8d2b8bf5,
         type: 3}
       propertyPath: maxSlopeAngle
-      value: 5
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 3150054365407586789, guid: a207854b134c34a41b6b48ef8d2b8bf5,
         type: 3}

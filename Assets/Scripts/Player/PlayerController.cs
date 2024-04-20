@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
     public float jumpMovementFactor = 0.5f;
     [HideInInspector] public bool hasJumpInput;
     [Header("Slope")]
-    public float maxSlopeAngle = 45;
+    public float maxSlopeAngle = 60f;
     [HideInInspector] public bool isGrounded;
     [HideInInspector] public bool isOnSlope;
     [HideInInspector] public Vector3 slopeNormal;
@@ -59,7 +59,7 @@ public class PlayerController : MonoBehaviour
         movementVector = new Vector3(inputX, 0, inputZ);
         hasJumpInput = Input.GetKey(KeyCode.Space);
 
-        float velocity = thisRigidbody.velocity.magnitude;
+        float velocity = thisRigidbody.velocity.magnitude/maxSpeed;
         thisAnimator.SetFloat("fVelocity",velocity);
 
         DetectGround();
@@ -68,9 +68,8 @@ public class PlayerController : MonoBehaviour
         stateMachine.Update();
     }
     void FixedUpdate() {
-        Vector3 gravityForce = Physics.gravity * (isOnSlope ? -0.8f : 1f);
+        Vector3 gravityForce = Physics.gravity * (isOnSlope ? 0.1f : 1f);
         thisRigidbody.AddForce(gravityForce, ForceMode.Acceleration);
-
         LimitSpeed();
         stateMachine.FixedUpdate();
     }
@@ -96,7 +95,7 @@ public class PlayerController : MonoBehaviour
         Camera camera = Camera.main;
         Quaternion q1 = Quaternion.LookRotation(movementVector, Vector3.up);
         Quaternion q2 = Quaternion.Euler(0,camera.transform.eulerAngles.y,0);
-        Quaternion newRotation = Quaternion.LerpUnclamped(transform.rotation, q1*q2, 0.5f);
+        Quaternion newRotation = Quaternion.LerpUnclamped(transform.rotation, q1*q2, 0.3f);
         
         thisRigidbody.MoveRotation(newRotation);
     }
