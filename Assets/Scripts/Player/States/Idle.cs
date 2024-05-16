@@ -13,6 +13,9 @@ public class Idle: State {
     }
     public override void Update() {
         base.Update();
+        if (controller.AttemptToAttack()) {
+            return;
+        }
         if(controller.hasJumpInput) {
             controller.stateMachine.ChangeState(controller.jumpState);
             return;

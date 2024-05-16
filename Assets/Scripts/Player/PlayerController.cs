@@ -4,29 +4,37 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    // Internals - teste
+    // Internals
     [HideInInspector] public StateMachine stateMachine;
     [HideInInspector] public Idle idleState;
     [HideInInspector] public Walking walkingState;
     [HideInInspector] public Jump jumpState;
     [HideInInspector] public Dead deadState;
+    [HideInInspector] public Attack attackState;
     [HideInInspector] public Collider thisCollider;
     [HideInInspector] public Rigidbody thisRigidbody;
     [HideInInspector] public Animator thisAnimator;
+
     [Header("Movement")]
     public float speed = 10f;
     public float maxSpeed = 10f;
     [HideInInspector] public Vector3 movementVector;
+
     [Header("Jump")]
     public float jumpPower = 8f;
     public float jumpMovementFactor = 0.5f;
     [HideInInspector] public bool hasJumpInput;
+   
     [Header("Slope")]
     public float maxSlopeAngle = 60f;
     [HideInInspector] public bool isGrounded;
     [HideInInspector] public bool isOnSlope;
     [HideInInspector] public Vector3 slopeNormal;
 
+    [Header("Attack")]
+    public int attackStages;
+    public List<float> attackStageDurations;
+    public List<float> attackStageMaxIntervals;
     void Awake() {
         thisRigidbody = GetComponent<Rigidbody>();
         thisAnimator = GetComponent<Animator>();
@@ -38,6 +46,7 @@ public class PlayerController : MonoBehaviour
         walkingState = new Walking(this);
         jumpState = new Jump(this);
         deadState = new Dead(this);
+        attackState = new Attack(this);
         stateMachine.ChangeState(idleState);
     }
 
@@ -100,6 +109,20 @@ public class PlayerController : MonoBehaviour
         thisRigidbody.MoveRotation(newRotation);
     }
 
+    public bool AttemptToAttack() {
+        if (Input.GetMouseButtonDown(0)) {
+            var isAttacking = stateMachine.currentStateName == attackState.name;
+            var canAttack = !isAttacking || attackState.CanSwitchStages();
+            if (canAttack) {
+                var attackStage = isAttacking ? (attackState.stage + 1) : 0;
+                attackState.stage = attackStage;
+                stateMachine.ChangeState(attackState);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void DetectGround() {
         // reset flag
         isGrounded = false;
@@ -136,10 +159,11 @@ public class PlayerController : MonoBehaviour
         }
 
     }
-
+// /*
     void OnGUI() {
         string s= stateMachine.currentStateName + " - " + isOnSlope;
         GUI.Label(new Rect(5,5,400,100), s);
     }
+// */
 
 }
