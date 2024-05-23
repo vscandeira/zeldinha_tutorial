@@ -1953,6 +1953,7 @@ MonoBehaviour:
   thisAnimator: {fileID: 0}
   speed: 15
   maxSpeed: 10
+  movSmooth: 0.3
   movementVector: {x: 0, y: 0, z: 0}
   jumpPower: 15
   jumpMovementFactor: 0.5
@@ -1961,6 +1962,18 @@ MonoBehaviour:
   isGrounded: 0
   isOnSlope: 0
   slopeNormal: {x: 0, y: 0, z: 0}
+  attackStages: 3
+  attackStageDurations:
+  - 0.25
+  - 0.25
+  - 0.6
+  attackStageMaxIntervals:
+  - 0.25
+  - 0.25
+  attackStageImpulses:
+  - 7
+  - 10
+  - 15
 --- !u!114 &8855052670802634626
 MonoBehaviour:
   m_ObjectHideFlags: 0

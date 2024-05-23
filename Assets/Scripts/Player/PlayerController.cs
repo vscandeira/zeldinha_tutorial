@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     [Header("Movement")]
     public float speed = 10f;
     public float maxSpeed = 10f;
+    public float movSmooth = 0.3f;
     [HideInInspector] public Vector3 movementVector;
 
     [Header("Jump")]
@@ -35,6 +36,7 @@ public class PlayerController : MonoBehaviour
     public int attackStages;
     public List<float> attackStageDurations;
     public List<float> attackStageMaxIntervals;
+    public List<float> attackStageImpulses;
     void Awake() {
         thisRigidbody = GetComponent<Rigidbody>();
         thisAnimator = GetComponent<Animator>();
@@ -98,13 +100,14 @@ public class PlayerController : MonoBehaviour
         return Quaternion.Euler(0,eulerY,0);
     }
 
-    public void RotateBodyToFaceInput() {
+    public void RotateBodyToFaceInput(float alpha = 0f) {
         if(movementVector.IsZero()) return;
         
+        float beta = alpha==0f ? movSmooth : alpha;
         Camera camera = Camera.main;
         Quaternion q1 = Quaternion.LookRotation(movementVector, Vector3.up);
         Quaternion q2 = Quaternion.Euler(0,camera.transform.eulerAngles.y,0);
-        Quaternion newRotation = Quaternion.LerpUnclamped(transform.rotation, q1*q2, 0.3f);
+        Quaternion newRotation = Quaternion.LerpUnclamped(transform.rotation, q1*q2, beta);
         
         thisRigidbody.MoveRotation(newRotation);
     }
@@ -161,7 +164,7 @@ public class PlayerController : MonoBehaviour
     }
 // /*
     void OnGUI() {
-        string s= stateMachine.currentStateName + " - " + isOnSlope;
+        string s= stateMachine.currentStateName + " - " + attackStages + " - " + attackState.stage;
         GUI.Label(new Rect(5,5,400,100), s);
     }
 // */
