@@ -20,10 +20,13 @@ public class Attack: State {
         firstFixedUpdate = true;
         controller.thisAnimator.SetTrigger("tAttack"+stage);
 
+        controller.swordHitbox.SetActive(true);
+
     }
     public override void Exit() {
         base.Exit();
         //stage = stage>(controller.attackStages-1) ? 0 : stage;
+        controller.swordHitbox.SetActive(false);
     }
     public override void Update() {
         base.Update();

@@ -37,6 +37,8 @@ public class PlayerController : MonoBehaviour
     public List<float> attackStageDurations;
     public List<float> attackStageMaxIntervals;
     public List<float> attackStageImpulses;
+    public GameObject swordHitbox;
+    public float swordKnockbackImpulse;
     void Awake() {
         thisRigidbody = GetComponent<Rigidbody>();
         thisAnimator = GetComponent<Animator>();
@@ -50,6 +52,7 @@ public class PlayerController : MonoBehaviour
         deadState = new Dead(this);
         attackState = new Attack(this);
         stateMachine.ChangeState(idleState);
+        swordHitbox.SetActive(false);
     }
 
     // Update is called once per frame
@@ -92,6 +95,18 @@ public class PlayerController : MonoBehaviour
         Vector3 ret = movVector * speed;
         ret = GetFoward() * ret;
         return ret;
+    }
+
+    public void OnSwordCollisionEnter(Collider other){
+        var otherObject = other.gameObject;
+        var otherRigidBody = otherObject.GetComponent<Rigidbody>();
+        var isTarget = otherObject.layer == LayerMask.NameToLayer("Target");
+        if (isTarget && otherRigidBody != null) {
+            var positionDiff = otherObject.transform.position - gameObject.transform.position;
+            var impulseVector = new Vector3(positionDiff.normalized.x, 0, positionDiff.normalized.z);
+            impulseVector *= swordKnockbackImpulse;
+            otherRigidBody.AddForce(impulseVector, ForceMode.Impulse);
+        }
     }
 
     public Quaternion GetFoward() {
