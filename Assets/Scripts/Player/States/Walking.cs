@@ -15,6 +15,10 @@ public class Walking : State {
         if (controller.AttemptToAttack()) {
             return;
         }
+        if(controller.hasDefenseInput) {
+            controller.stateMachine.ChangeState(controller.defendState);
+            return;
+        }
         if(controller.hasJumpInput) {
             controller.stateMachine.ChangeState(controller.jumpState);
             return;

@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     [HideInInspector] public Jump jumpState;
     [HideInInspector] public Dead deadState;
     [HideInInspector] public Attack attackState;
+    [HideInInspector] public Defend defendState;
     [HideInInspector] public Collider thisCollider;
     [HideInInspector] public Rigidbody thisRigidbody;
     [HideInInspector] public Animator thisAnimator;
@@ -38,7 +39,11 @@ public class PlayerController : MonoBehaviour
     public List<float> attackStageMaxIntervals;
     public List<float> attackStageImpulses;
     public GameObject swordHitbox;
-    public float swordKnockbackImpulse;
+    public float swordKnockBackImpulse = 10;
+    [Header("Defend")]
+    public GameObject shieldHitbox;
+    public float shieldKnockBackImpulse = 10;
+    [HideInInspector] public bool hasDefenseInput;
     void Awake() {
         thisRigidbody = GetComponent<Rigidbody>();
         thisAnimator = GetComponent<Animator>();
@@ -51,8 +56,10 @@ public class PlayerController : MonoBehaviour
         jumpState = new Jump(this);
         deadState = new Dead(this);
         attackState = new Attack(this);
+        defendState = new Defend(this);
         stateMachine.ChangeState(idleState);
         swordHitbox.SetActive(false);
+        shieldHitbox.SetActive(false);
     }
 
     // Update is called once per frame
@@ -72,6 +79,7 @@ public class PlayerController : MonoBehaviour
         float inputX = isRight ? 1 : isLeft ? -1 : 0;
         movementVector = new Vector3(inputX, 0, inputZ);
         hasJumpInput = Input.GetKey(KeyCode.Space);
+        hasDefenseInput = Input.GetMouseButton(1);
 
         float velocity = thisRigidbody.velocity.magnitude/maxSpeed;
         thisAnimator.SetFloat("fVelocity",velocity);
@@ -104,11 +112,22 @@ public class PlayerController : MonoBehaviour
         if (isTarget && otherRigidBody != null) {
             var positionDiff = otherObject.transform.position - gameObject.transform.position;
             var impulseVector = new Vector3(positionDiff.normalized.x, 0, positionDiff.normalized.z);
-            impulseVector *= swordKnockbackImpulse;
+            impulseVector *= swordKnockBackImpulse;
             otherRigidBody.AddForce(impulseVector, ForceMode.Impulse);
         }
     }
 
+    public void OnShieldCollisionEnter(Collider other){
+        var otherObject = other.gameObject;
+        var otherRigidBody = otherObject.GetComponent<Rigidbody>();
+        var isTarget = true;
+        if (isTarget && otherRigidBody != null) {
+            var positionDiff = otherObject.transform.position - gameObject.transform.position;
+            var impulseVector = new Vector3(positionDiff.normalized.x, 0, positionDiff.normalized.z);
+            impulseVector *= shieldKnockBackImpulse;
+            otherRigidBody.AddForce(impulseVector, ForceMode.Impulse);
+        }
+    }
     public Quaternion GetFoward() {
         Camera camera = Camera.main;
         float eulerY = camera.transform.eulerAngles.y;
