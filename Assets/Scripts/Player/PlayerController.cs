@@ -183,6 +183,7 @@ public class PlayerController : MonoBehaviour
         float maxDistance = 0.2f;
         if (Physics.Raycast(origin, direction, out var slopeHitInfo, maxDistance)){
             float angle = Vector3.Angle(Vector3.up, slopeHitInfo.normal);
+            if (angle != 0) Debug.Log(angle);
             isOnSlope = angle < maxSlopeAngle && angle != 0;
             slopeNormal = isOnSlope ? slopeHitInfo.normal : Vector3.zero;
         }
@@ -198,7 +199,7 @@ public class PlayerController : MonoBehaviour
     }
 // /*
     void OnGUI() {
-        string s= stateMachine.currentStateName + " - " + attackStages + " - " + attackState.stage;
+        string s= stateMachine.currentStateName + " - " + isOnSlope + " - " + slopeNormal;
         GUI.Label(new Rect(5,5,400,100), s);
     }
 // */
