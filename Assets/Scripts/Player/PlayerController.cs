@@ -175,17 +175,19 @@ public class PlayerController : MonoBehaviour
     }
 
     public void DetectSlope(){
-        isOnSlope = false;
         slopeNormal = Vector3.zero;
 
         Vector3 origin = transform.position;
-        Vector3 direction = Vector3.down;
-        float maxDistance = 0.2f;
+        //Vector3 direction = Vector3.down;
+        Vector3 direction = new Vector3(transform.position.x, (transform.position.y-1), transform.position.z);
+        float maxDistance = 0.5f;
         if (Physics.Raycast(origin, direction, out var slopeHitInfo, maxDistance)){
             float angle = Vector3.Angle(Vector3.up, slopeHitInfo.normal);
             if (angle != 0) Debug.Log(angle);
             isOnSlope = angle < maxSlopeAngle && angle != 0;
             slopeNormal = isOnSlope ? slopeHitInfo.normal : Vector3.zero;
+        } else {
+            isOnSlope = false;
         }
     }
 
@@ -203,5 +205,19 @@ public class PlayerController : MonoBehaviour
         GUI.Label(new Rect(5,5,400,100), s);
     }
 // */
+
+/*
+void OnDrawGizmos() {
+        if(!thisCollider) return;
+
+        Vector3 origin = transform.position;
+        float maxDistance = 0.5f;
+        Vector3 direction = new Vector3(transform.position.x, (transform.position.y-maxDistance), transform.position.z);
+
+        // Draw ray
+        Gizmos.color = isGrounded ? Color.green : Color.red;
+        Gizmos.DrawLine(origin, direction);
+    }
+*/
 
 }
